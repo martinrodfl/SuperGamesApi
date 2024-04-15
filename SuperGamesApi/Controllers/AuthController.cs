@@ -54,7 +54,7 @@ namespace SuperGamesApi.Controllers
         [ProducesResponseType(typeof(ErrorResponse), 404)]
         public async Task<IActionResult> Login([FromBody] LoginUserRequest request)
         {
-
+            // Validar que ningun campo este vacio
             if (request.Email.Length < 1 || request.Password.Length < 1)
             {
                 return BadRequest(new ErrorResponse { Status = 400, Message = "All fields are required" });
