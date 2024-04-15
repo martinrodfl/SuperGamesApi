@@ -1,0 +1,6 @@
+@SuperGamesApi_HostAddress = http://localhost:5033
+
+GET {{SuperGamesApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
