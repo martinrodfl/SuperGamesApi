@@ -12,7 +12,7 @@ using SuperGamesApi.Contexts;
 namespace SuperGamesApi.Migrations
 {
     [DbContext(typeof(SuperGamesContext))]
-    [Migration("20240414233550_Second")]
+    [Migration("20240415201148_Second")]
     partial class Second
     {
         /// <inheritdoc />
@@ -51,6 +51,19 @@ namespace SuperGamesApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("SuperGamesApi.Models.GameIds", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "GameId");
+
+                    b.ToTable("GameIds");
                 });
 #pragma warning restore 612, 618
         }

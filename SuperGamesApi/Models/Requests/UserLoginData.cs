@@ -2,7 +2,7 @@
 {
     public class UserLoginData
     {
-        //Clase para LoginResponse - datos mapeados para no entregar todo el usuario
+        //Clase para usar con LoginResponse - datos mapeados para no entregar todo el usuario
 
         public int? Id { get; set; }
         public string? UserName { get; set; }

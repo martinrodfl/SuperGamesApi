@@ -1,9 +1,7 @@
 ﻿
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using NuGet.Protocol.Plugins;
 using SuperGamesApi.Contexts;
 using SuperGamesApi.Helpers;
 using SuperGamesApi.Models;
@@ -18,7 +16,6 @@ namespace SuperGamesApi.Controllers
 {
     public class AuthController : ControllerBase
     {
-
         private readonly SuperGamesContext _SuperGamesContext;
         private readonly IConfiguration _config;
         public AuthController(SuperGamesContext userDBContext, IConfiguration config)
@@ -26,8 +23,6 @@ namespace SuperGamesApi.Controllers
             _SuperGamesContext = userDBContext;
             _config = config;
         }
-
-
 
         //---------------------LOGIN--------------------------
         /// <summary>
@@ -81,17 +76,18 @@ namespace SuperGamesApi.Controllers
 
             var tokenString = GenerateTokenString(user);
 
+            var myGames = await _SuperGamesContext.GameIds.Where(g => g.UserId == user.Id)
+                           .Select(g => g.GameId)
+                           .ToListAsync();
 
             return Ok(new LoginUserResponse
             {
                 Status = 200,
                 Token = tokenString,
                 User = user.GetTokenAndName(),
+                MyGames = myGames
             });
-
-
         }
-
 
         //---------------------REGISTER--------------------------
         /// <summary>
@@ -167,13 +163,18 @@ namespace SuperGamesApi.Controllers
 
             var userRegistered = await _SuperGamesContext.Users.FirstOrDefaultAsync(u => u.Email == user.Email && u.Password == encryptedpass);
 
+            if (userRegistered == null )
+            {
+                return BadRequest(new ErrorResponse { Status = 400, Message = "Password and Password confirmation do not match" });
+            }
+
             var tokenString = GenerateTokenString(userRegistered);
 
             return new CreatedResult($"https://localhost:7122/api/user/{userRegistered?.Id}", new LoginUserResponse
             {
                 Status = 201,
                 Token = tokenString,
-                User = userRegistered.GetTokenAndName(),
+                User = userRegistered?.GetTokenAndName(),
             });
         }
 
@@ -205,19 +206,19 @@ namespace SuperGamesApi.Controllers
 
 
         // VERIFICACIONES
-        private static bool IsValidFirstAndLastName(string name)
+        public static bool IsValidFirstAndLastName(string name)
         {
             // Expresión regular para validar nombres con un espacio opcional entre el primer y el segundo nombre
             string pattern = @"^[a-zA-Z]+(?: [a-zA-Z]+)?$";
             Regex regex = new Regex(pattern);
             return regex.IsMatch(name) && name.Length >= 2 && name.Length <= 20;
         }
-        private bool EmailExists(string? email)
+        public bool EmailExists(string? email)
         {
             return _SuperGamesContext.Users.Any(e => e.Email == email);
         }
 
-        private static bool IsValidEmail(string email)
+        public static bool IsValidEmail(string email)
         {
             // Expresión regular para validar email
             string pattern = @"^[a-zA-Z0-9_\.-]+@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}$";
@@ -225,8 +226,7 @@ namespace SuperGamesApi.Controllers
             return regex.IsMatch(email);
         }
 
-
-        private static bool IsValidPassword(string password)
+        public static bool IsValidPassword(string password)
         {
             // Reglas básicas para la contraseña: al menos 8 caracteres, una letra mayúscula, una letra minúscula y un número
             string pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{8,}$";

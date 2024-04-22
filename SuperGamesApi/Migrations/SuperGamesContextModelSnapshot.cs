@@ -49,6 +49,19 @@ namespace SuperGamesApi.Migrations
 
                     b.ToTable("Users");
                 });
+
+            modelBuilder.Entity("SuperGamesApi.Models.GameIds", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "GameId");
+
+                    b.ToTable("GameIds");
+                });
 #pragma warning restore 612, 618
         }
     }
