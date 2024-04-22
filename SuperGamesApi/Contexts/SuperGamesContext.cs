@@ -10,8 +10,31 @@ namespace SuperGamesApi.Contexts
     {
         public SuperGamesContext(DbContextOptions<SuperGamesContext> options) : base(options) { }
         public DbSet<UserEntity> Users { get; set; }
+        public DbSet<GameIds> GameIds { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<GameIds>()
+                .HasKey(e => new { e.UserId, e.GameId });
+        }
 
+        // GET GAMES from 1 user-------------------------------
+        public async Task<List<int>> GetGamesIds(int userId)
+        {
+            return await GameIds
+                            .Where(g => g.UserId == userId)
+                            .Select(g => g.GameId)
+                            .ToListAsync();
+        }
+
+        public async Task<int> GetLastGameId(int userId)
+        {
+            return await GameIds
+                            .Where(g => g.UserId == userId)
+                            .OrderByDescending(g => g.GameId)
+                            .Select(g => g.GameId)
+                            .FirstOrDefaultAsync();
+        }
         // GET ONE USER-------------------------------
         public async Task<UserEntity?> Get(long id)
         {
